@@ -1,21 +1,66 @@
 {% extends 'base.html' %}
 
+{% block title %}Catálogo de Productos{% endblock %}
+
 {% block content %}
-<h2>Productos</h2>
-<a href="{% url 'producto-create' %}" class="btn btn-success mb-3">Nuevo Producto</a>
-<div class="row">
-    {% for producto in productos %}
-        <div class="col-md-4">
-            <div class="card">
-                <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+<div class="container py-4">
+    <!-- Filtros Avanzados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5>{{ producto.nombre }}</h5>
-                    <p>${{ producto.precio }}</p>
-                    <a href="{% url 'producto-update' producto.pk %}" class="btn btn-warning">Editar</a>
-                    <a href="{% url 'producto-delete' producto.pk %}" class="btn btn-danger">Eliminar</a>
+                    <div class="d-flex flex-wrap gap-3 align-items-center">
+                        <span class="fw-bold">Filtrar por:</span>
+                        <select class="form-select form-select-sm" style="max-width: 200px" id="priceFilter">
+                            <option value="">Precio</option>
+                            <option value="asc">Menor a Mayor</option>
+                            <option value="desc">Mayor a Menor</option>
+                        </select>
+                        <div class="vr"></div>
+                        {% for categoria in categorias %}
+                        <a href="?categoria={{ categoria.slug }}" 
+                           class="badge rounded-pill text-decoration-none {% if categoria.slug == request.GET.categoria %}bg-primary{% else %}bg-secondary{% endif %}">
+                            {{ categoria.nombre }}
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
-    {% endfor %}
+    </div>
+
+    <!-- Grid de Productos -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
+        {% for producto in productos %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="position-relative">
+                    <div class="ratio ratio-1x1">
+                        <img src="{{ producto.imagen.url }}" 
+                             class="card-img-top object-fit-cover" 
+                             alt="{{ producto.nombre }}">
+                    </div>
+                    <span class="badge bg-dark position-absolute top-0 end-0 m-2">
+                        {{ producto.categoria.nombre }}
+                    </span>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fs-6 mb-2">{{ producto.nombre }}</h5>
+                    <p class="card-text fw-bold text-primary mb-3">${{ producto.precio }}</p>
+                    <div class="mt-auto d-grid gap-2">
+                        <a href="{% url 'producto-update' producto.pk %}" 
+                           class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-edit me-2"></i>Editar
+                        </a>
+                        <a href="{% url 'producto-delete' producto.pk %}" 
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

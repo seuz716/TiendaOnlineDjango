@@ -97,4 +97,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media Files (para imágenes y archivos subidos por el usuario)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

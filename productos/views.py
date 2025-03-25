@@ -1,7 +1,10 @@
+# views.py
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Categoria, Producto
 from .forms import CategoriaForm, ProductoForm
+from django.http import JsonResponse
+from django.db.models import Q
 
 # Listar categorías
 class CategoriaListView(ListView):
@@ -53,3 +56,16 @@ class ProductoDeleteView(DeleteView):
     model = Producto
     template_name = 'productos/producto_confirm_delete.html'
     success_url = reverse_lazy('producto-list')
+
+
+
+def buscar_productos(request):
+    query = request.GET.get('search', '')
+    productos = Producto.objects.filter(
+        Q(nombre__icontains=query) | 
+        Q(descripcion__icontains=query)
+    ).values('nombre', 'precio', 'imagen')
+    
+    return JsonResponse({
+        'results': list(productos)
+    })
