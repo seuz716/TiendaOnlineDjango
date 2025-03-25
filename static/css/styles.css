@@ -1,0 +1,69 @@
+/* styles.css */
+
+/* Fuente y configuración global */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #343a40;
+}
+
+.navbar-brand, .nav-link {
+    color: #ffffff !important;
+}
+
+.navbar-brand:hover, .nav-link:hover {
+    color: #adb5bd !important;
+}
+
+/* Botón del carrito */
+#cart-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ffc107;
+    padding: 10px;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+#cart-widget:hover {
+    transform: scale(1.1);
+}
+
+/* Galería de productos */
+.product-gallery img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.product-gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* Botones */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Productos</h2>
+<a href="{% url 'producto-create' %}" class="btn btn-success mb-3">Nuevo Producto</a>
+<div class="row">
+    {% for producto in productos %}
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+                <div class="card-body">
+                    <h5>{{ producto.nombre }}</h5>
+                    <p>${{ producto.precio }}</p>
+                    <a href="{% url 'producto-update' producto.pk %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'producto-delete' producto.pk %}" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
