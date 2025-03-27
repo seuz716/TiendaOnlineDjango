@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Tu Carrito{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Resumen del Carrito</h2>
+    {% if items %}
+    <div class="card">
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            {% if item.producto.imagen %}
+                            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" style="width:50px; height:50px;">
+                            {% else %}
+                            Sin imagen
+                            {% endif %}
+                        </td>
+                        <td>{{ item.producto.nombre }}</td>
+                        <td>{{ item.cantidad }}</td>
+                        <td>$ {{ item.producto.precio|floatformat:2 }}</td>
+                        <td>$ {{ item.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <h4>Total: ${{ total|floatformat:2 }}</h4>
+            <a href="{% url 'cart:pedido_create' %}" class="btn btn-success">Hacer Pedido</a>
+        </div>
+    </div>
+    {% else %}
+    <p>Tu carrito está vacío.</p>
+    {% endif %}
+</div>
+{% endblock %}
