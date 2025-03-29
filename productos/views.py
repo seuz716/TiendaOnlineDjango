@@ -18,7 +18,7 @@ from django.http import JsonResponse
 # Listar categorías
 class CategoriaListView(ListView):
     model = Categoria
-    template_name = 'products/categoria_list.html'
+    template_name = 'productos/categoria_list.html'
     context_object_name = 'categorias'
 
 
@@ -26,7 +26,7 @@ class CategoriaListView(ListView):
 class CategoriaCreateView(CreateView):
     model = Categoria
     form_class = CategoriaForm
-    template_name = 'products/categoria_form.html'
+    template_name = 'productos/categoria_form.html'
     success_url = reverse_lazy('categoria-list')
 
 
@@ -138,6 +138,27 @@ def filtrar_productos(request):
     
     # Renderiza el template parcial con los productos filtrados
     html = render_to_string('productos/_product_grid.html', {'productos': productos})
+    return JsonResponse({'html': html})
+
+def filtrar_productos_adm(request):
+    categoria_slug = request.GET.get('categoria')
+    price_filter = request.GET.get('priceFilter')
+    
+    # Inicia con todos los productos (puedes agregar select_related para optimizar)
+    productos = Producto.objects.all().select_related('categoria')
+    
+    # Filtro por categoría si se pasó el parámetro
+    if categoria_slug:
+        productos = productos.filter(categoria__slug=categoria_slug)
+    
+    # Ordenar según el filtro de precio
+    if price_filter == 'asc':
+        productos = productos.order_by('precio')
+    elif price_filter == 'desc':
+        productos = productos.order_by('-precio')
+    
+    # Renderiza el template parcial con los productos filtrados
+    html = render_to_string('productos/_product_gridAdm.html', {'productos': productos})
     return JsonResponse({'html': html})
 
 

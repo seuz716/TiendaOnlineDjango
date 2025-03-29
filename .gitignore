@@ -25,7 +25,7 @@ db.sqlite3
 
 # Archivos estáticos y multimedia generados
 staticfiles/
-media/
+
 
 # Archivos de compilación
 *.pyc

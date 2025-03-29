@@ -2,8 +2,10 @@ from django.urls import path
 from .views import (
     CategoriaListView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView,
     ProductoListView, ProductoClientListView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView,
-    buscar_productos, filtrar_productos
+    buscar_productos, filtrar_productos, filtrar_productos_adm
 )
+
+
 
 urlpatterns = [
     # Categorías (administración)
@@ -19,6 +21,8 @@ urlpatterns = [
     path('productos/eliminar/<int:pk>/', ProductoDeleteView.as_view(), name='producto-delete'),
     path('buscar/', buscar_productos, name='buscar-productos'),
     path('filtrar/', filtrar_productos, name='filtrar_productos'),
+    path('filtrarAdm/', filtrar_productos_adm, name='filtrar_productos_adm'),
+
 
     # Cliente: Listado de Productos con descripción resumida y "Agregar al Carrito"
     path('', ProductoClientListView.as_view(), name='producto-client-list'),

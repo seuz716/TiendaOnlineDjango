@@ -10,6 +10,9 @@
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
@@ -21,61 +24,155 @@
 </head>
 <body class="d-flex flex-column h-100">
     <!-- Navbar Moderno -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <img src="{% static 'images/logo.png' %}" alt="Logo" width="40" height="40" class="d-inline-block align-top me-2">
+                <img src="{% static 'images/logo.png' %}" 
+                     alt="Logo" 
+                     width="40" 
+                     height="40" 
+                     class="d-inline-block align-top me-2 logo-hover"
+                     loading="lazy">
                 Tienda Online
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="d-flex align-items-center">
+                <!-- Dark Mode Toggle -->
+                <button class="btn btn-link text-light me-3" id="darkModeToggle" aria-label="Activar modo oscuro">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <button class="navbar-toggler" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#mainNav"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
             
             <div class="collapse navbar-collapse" id="mainNav">
-                <!-- Búsqueda Global -->
+                <!-- Búsqueda Global con Autocomplete -->
                 <form class="d-flex ms-lg-auto me-lg-3 my-2 my-lg-0" role="search" id="searchForm">
-                    <div class="input-group">
+                    <div class="input-group search-group">
                         <input type="search" 
-                               class="form-control" 
+                               class="form-control search-input" 
                                placeholder="Buscar productos..." 
                                aria-label="Buscar"
-                               id="globalSearch">
-                        <button class="btn btn-outline-light" type="submit">
+                               id="globalSearch"
+                               autocomplete="off"
+                               loading="lazy">
+                        <button class="btn btn-outline-light search-button" type="submit" aria-label="Buscar">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
                             <i class="fas fa-search"></i>
                         </button>
+                        <div class="autocomplete-results shadow" id="autocompleteResults"></div>
                     </div>
                 </form>
                 
                 <!-- Menú y Filtros -->
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" 
+                           href="#" 
+                           role="button" 
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
                             <i class="fas fa-filter me-1"></i>Categorías
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% for categoria in categorias %}
                             <li>
-                                <a class="dropdown-item" href="?categoria={{ categoria.slug }}">
-                                    <i class="{{ categoria.icono }} me-2"></i>{{ categoria.nombre }}
+                                <a class="dropdown-item d-flex align-items-center" 
+                                   href="?categoria={{ categoria.slug }}">
+                                    <i class="{{ categoria.icono }} me-2"></i>
+                                    <span>{{ categoria.nombre }}</span>
                                 </a>
                             </li>
                             {% endfor %}
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cart/">
+                        <a class="nav-link position-relative" 
+                           href="/cart/" 
+                           aria-label="Carrito de compras">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="badge bg-danger ms-1" id="cartCount">0</span>
+                            <span class="badge bg-danger ms-1 pulse" id="cartCount">0</span>
                         </a>
                     </li>
                 </ul>
+
+                <!-- Sección de usuario -->
+                <div class="navbar-nav ms-lg-3">
+                    {% if user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" 
+                           href="#" 
+                           role="button" 
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="fas fa-user-circle me-2"></i>
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- En la sección del navbar donde están los demás elementos -->
+<div class="navbar-nav">
+    {% if user.is_authenticated and user.is_staff %}
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-tools me-1"></i>Administración
+        </a>
+        <ul class="dropdown-menu">
+            <!-- Menú Productos -->
+            <li>
+                <a class="dropdown-item" href="{% url 'producto-list' %}">
+                    <i class="fas fa-box-open me-2"></i>Ver Productos
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'producto-create' %}">
+                    <i class="fas fa-plus-circle me-2"></i>Nuevo Producto
+                </a>
+            </li>
+            
+            <!-- Menú Categorías -->
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="{% url 'categoria-list' %}">
+                    <i class="fas fa-tags me-2"></i>Ver Categorías
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'categoria-create' %}">
+                    <i class="fas fa-folder-plus me-2"></i>Nueva Categoría
+                </a>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+                    {% else %}
+                    <a class="nav-link" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Contenido Principal -->
-    <main class="flex-shrink-0">
+    <main class="flex-shrink-0" style="padding-top: 5%;">
         <div class="container py-4">
             {% block content %}{% endblock %}
         </div>
@@ -110,6 +207,14 @@
             <p class="text-center text-muted mb-0">&copy; 2024 Tienda Online. Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    <!-- Scroll to Top -->
+    <button class="btn btn-primary scroll-top shadow" aria-label="Volver arriba">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

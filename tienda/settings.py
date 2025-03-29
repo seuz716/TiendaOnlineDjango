@@ -91,6 +91,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # ✅ Ruta para los archivos estáticos
 ]
 
+# Configuración de redirección tras login/logout
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -105,3 +109,21 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# Configuración de autenticación
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_REDIRECT_URL = 'producto-list'  # Redirecciona aquí después del login
+LOGIN_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
+# Configuración de seguridad adicional
+SECURE_HSTS_SECONDS = 31536000  # 1 año
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = False  # Cambiar a True en producción con HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+DEBUG = os.getenv('DEBUG', 'True') == 'True'

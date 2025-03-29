@@ -26,3 +26,4 @@ class ProductoForm(forms.ModelForm):
             'categoria': forms.Select(attrs={'class': 'form-select'}),
             'caracteristicas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+        

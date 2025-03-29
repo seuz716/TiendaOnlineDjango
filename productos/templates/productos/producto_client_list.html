@@ -3,7 +3,7 @@
 {% block title %}Catálogo de Productos{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-4 fade-in">
     <!-- Filtros Avanzados -->
     <div class="row mb-4">
         <div class="col-12">
@@ -11,16 +11,32 @@
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-3 align-items-center">
                         <span class="fw-bold">Filtrar por:</span>
-                        <!-- Filtro de Precio -->
-                        <select name="priceFilter" class="form-select form-select-sm" style="max-width: 200px" id="priceFilter">
-                            <option value="" {% if not request.GET.priceFilter %}selected{% endif %}>Precio</option>
-                            <option value="asc" {% if request.GET.priceFilter == 'asc' %}selected{% endif %}>Menor a Mayor</option>
-                            <option value="desc" {% if request.GET.priceFilter == 'desc' %}selected{% endif %}>Mayor a Menor</option>
-                        </select>
+                        
+                        <!-- Filtro de Precio con Spinner -->
+                        <div class="position-relative">
+                            <select name="priceFilter" 
+                                    class="form-select form-select-sm" 
+                                    style="max-width: 200px" 
+                                    id="priceFilter"
+                                    aria-label="Filtrar por precio">
+                                <option value="" {% if not request.GET.priceFilter %}selected{% endif %}>Precio</option>
+                                <option value="asc" {% if request.GET.priceFilter == 'asc' %}selected{% endif %}>Menor a Mayor</option>
+                                <option value="desc" {% if request.GET.priceFilter == 'desc' %}selected{% endif %}>Mayor a Menor</option>
+                            </select>
+                            <div class="filter-spinner spinner-border spinner-border-sm text-primary d-none" aria-hidden="true"></div>
+                        </div>
+                        
                         <div class="vr"></div>
-                        <!-- Dropdown para Categorías -->
+                        
+                        <!-- Dropdown para Categorías Mejorado -->
                         <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="categoriaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" 
+                                    type="button" 
+                                    id="categoriaDropdown" 
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false"
+                                    aria-haspopup="true"
+                                    aria-label="Filtrar por categoría">
                                 {% if request.GET.categoria %}
                                     {% for categoria in categorias %}
                                         {% if categoria.slug == request.GET.categoria %}
@@ -34,28 +50,38 @@
                             <ul class="dropdown-menu" aria-labelledby="categoriaDropdown">
                                 <li>
                                     <a class="dropdown-item {% if not request.GET.categoria %}active{% endif %} categoria-link" 
-                                       href="?{% if request.GET.priceFilter %}priceFilter={{ request.GET.priceFilter }}{% endif %}">
+                                       href="?{% if request.GET.priceFilter %}priceFilter={{ request.GET.priceFilter }}{% endif %}" 
+                                       role="button"
+                                       aria-label="Mostrar todas las categorías">
                                         Todas las Categorías
                                     </a>
                                 </li>
                                 {% for categoria in categorias %}
                                 <li>
                                     <a class="dropdown-item categoria-link {% if categoria.slug == request.GET.categoria %}active{% endif %}" 
-                                       href="?categoria={{ categoria.slug }}{% if request.GET.priceFilter %}&priceFilter={{ request.GET.priceFilter }}{% endif %}">
+                                       href="?categoria={{ categoria.slug }}{% if request.GET.priceFilter %}&priceFilter={{ request.GET.priceFilter }}{% endif %}"
+                                       role="button"
+                                       aria-label="Filtrar por categoría {{ categoria.nombre }}">
+                                        <i class="{{ categoria.icono }} me-2"></i>
                                         {{ categoria.nombre }}
                                     </a>
                                 </li>
                                 {% endfor %}
                             </ul>
                         </div>
-                    </div><!-- /.d-flex -->
-                </div><!-- /.card-body -->
-            </div><!-- /.card -->
-        </div><!-- /.col-12 -->
-    </div><!-- /.row -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Grid de Productos -->
-    <!-- Este contenedor se actualizará dinámicamente con los resultados del filtro -->
+    <!-- Spinner de Carga Global -->
+    <div id="loadingSpinner" class="d-none text-center my-4" aria-live="polite">
+        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+
+    <!-- Grid de Productos para Clientes -->
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
         {% include 'productos/_product_grid.html' with productos=productos %}
     </div>
@@ -64,43 +90,75 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const priceFilter = document.getElementById('priceFilter');
-    // Se seleccionan los enlaces del dropdown que tengan la clase "categoria-link"
     const categoriaLinks = document.querySelectorAll('.categoria-link');
     const productGrid = document.getElementById('productGrid');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const filterSpinner = document.querySelector('.filter-spinner');
+    let debounceTimer;
 
-    // Función que junta los parámetros actuales y realiza la petición AJAX
-    function applyFilters() {
-        // Se obtienen los valores actuales de los filtros
-        const params = new URLSearchParams(window.location.search);
-        // Actualiza el parámetro del filtro de precio según el select
-        params.set('priceFilter', priceFilter.value);
+    // Configurar Intersection Observer para animaciones
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, { threshold: 0.1 });
 
-        // Se arma la URL de la vista AJAX (asegúrate de tener configurada la URL con el nombre 'filtrar_productos')
-        const url = "{% url 'filtrar_productos' %}?" + params.toString();
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                productGrid.innerHTML = data.html;
-                // Actualiza la URL del navegador sin recargar la página
-                window.history.pushState({}, '', '?' + params.toString());
-            });
+    document.querySelectorAll('#productGrid .card').forEach(card => {
+        observer.observe(card);
+    });
+
+    function toggleLoading(show) {
+        filterSpinner.classList.toggle('d-none', !show);
+        priceFilter.disabled = show;
     }
 
-    // Cuando cambia el select de precio, se aplica el filtro
+    const debounce = (func, delay) => {
+        return (...args) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func(...args), delay);
+        };
+    };
+
+    const applyFilters = debounce(async () => {
+        try {
+            toggleLoading(true);
+            loadingSpinner.classList.remove('d-none');
+            
+            const params = new URLSearchParams(window.location.search);
+            params.set('priceFilter', priceFilter.value);
+            
+            const response = await fetch(`{% url 'filtrar_productos' %}?${params.toString()}`);
+            if (!response.ok) throw new Error('Error en el filtrado');
+            
+            const data = await response.json();
+            productGrid.innerHTML = data.html;
+            
+            document.querySelectorAll('#productGrid .card').forEach(card => {
+                observer.observe(card);
+            });
+            
+            window.history.pushState({}, '', `?${params.toString()}`);
+            showToast('Filtros aplicados correctamente', 'success');
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error al aplicar los filtros', 'danger');
+        } finally {
+            toggleLoading(false);
+            loadingSpinner.classList.add('d-none');
+        }
+    }, 300);
+
     priceFilter.addEventListener('change', applyFilters);
 
-    // Si se hace clic en alguna categoría (en el dropdown), se actualizan los filtros
     categoriaLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            // Actualiza la URL en el navegador (manteniendo el filtro de precio)
-            const urlObj = new URL(link.href, window.location.origin);
-            const params = new URLSearchParams(urlObj.search);
-            // Si ya se seleccionó un precio, lo conserva
+            const url = new URL(link.href, window.location.origin);
+            const params = new URLSearchParams(url.search);
             params.set('priceFilter', priceFilter.value);
-            window.history.pushState({}, '', '?' + params.toString());
-            // Aplica los filtros
+            window.history.pushState({}, '', `?${params.toString()}`);
             applyFilters();
         });
     });
