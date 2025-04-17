@@ -127,3 +127,15 @@ CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1',
+    'http://localhost'
+]
+
+SESSION_COOKIE_AGE = 1209600  # 2 semanas
+SESSION_SAVE_EVERY_REQUEST = True  # Guarda la sesión en cada petición
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # No borres la sesión al cerrar navegador
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'

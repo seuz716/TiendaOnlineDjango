@@ -6,7 +6,8 @@ __pycache__/
 # Entorno virtual
 env/
 venv/
-
+env_linux/
+env_linux/
 # Archivos de configuración del entorno
 *.env
 *.local

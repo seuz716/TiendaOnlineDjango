@@ -1,30 +1,43 @@
-document.addEventListener('DOMContentLoaded', () => {
-    initUXFeatures();
-    initCart();                   // Inicializa el contador persistente del carrito
-    initScrollTop();
-    initDarkMode();
-    initAutocomplete();
-    initCategoryFilter();
-    initRealTimeSearch();
-    initLightGallery();
+// =====================================================
+// 1. FUNCIONES DE UX & UTILIDADES
+// =====================================================
 
-    // Nuevas mejoras de UX:
-    initTooltips();                // Inicializa tooltips de Bootstrap
-    initLazyLoadImages();          // Fuerza lazy load en imágenes sin el atributo
-    initAutocompleteKeyboardNav(); // Mejora la navegación por teclado en el autocomplete
-    initGlobalErrorHandler();      // Manejo global de errores
+// Función para mostrar Toasts (requiere un contenedor con clase "toast-container")
+function showToast(message, type = 'success') {
+    const toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        console.warn('No se encontró el contenedor de toasts. Agrega un <div class="toast-container position-fixed bottom-0 end-0 p-3"></div> en tu HTML.');
+        return;
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    toastContainer.appendChild(toast);
+    new bootstrap.Toast(toast).show();
+}
 
-    // Sincroniza el contador entre pestañas
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'cartCount') {
-            updateCartCount(e.newValue);
+// Helper: Obtener el CSRF token desde las cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-    });
-});
+    }
+    return cookieValue;
+}
 
-/* Funciones originales (sin cambios importantes) */
-
-/* Animaciones al hacer scroll */
+// Animaciones al hacer scroll
 function initUXFeatures() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -36,20 +49,24 @@ function initUXFeatures() {
     document.querySelectorAll('.card, footer, .navbar').forEach(el => observer.observe(el));
 }
 
-/* Dark Mode */
+// Modo Oscuro
 function initDarkMode() {
     const toggle = document.getElementById('darkModeToggle');
     const isDark = localStorage.getItem('darkMode') === 'true';
     if (isDark) document.body.classList.add('dark-mode');
-    toggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'true' : 'false');
+
+        });
+    }
 }
 
-/* Scroll to Top */
+// Scroll to Top
 function initScrollTop() {
     const scrollButton = document.querySelector('.scroll-top');
+    if (!scrollButton) return;
     window.addEventListener('scroll', () => {
         scrollButton.classList.toggle('visible', window.scrollY > 300);
     });
@@ -58,85 +75,18 @@ function initScrollTop() {
     });
 }
 
-/* Búsqueda en tiempo real con Autocomplete */
-function initAutocomplete() {
-    const searchInput = document.getElementById('globalSearch');
-    const resultsContainer = document.getElementById('autocompleteResults');
-    const debounce = (func, delay) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func(...args), delay);
-        };
-    };
-    const performSearch = debounce(async (query) => {
-        if (query.length < 2) {
-            resultsContainer.style.display = 'none';
-            return;
-        }
-        // Simulación de resultados:
-        const fakeResults = [
-            { nombre: "Producto 1", url: "/productos/1/" },
-            { nombre: "Producto 2", url: "/productos/2/" },
-            { nombre: "Producto 3", url: "/productos/3/" }
-        ];
-        resultsContainer.innerHTML = fakeResults
-            .filter(item => item.nombre.toLowerCase().includes(query.toLowerCase()))
-            .map(item => `<div class="autocomplete-item" tabindex="0" data-url="${item.url}">${item.nombre}</div>`)
-            .join('');
-        resultsContainer.style.display = 'block';
-    }, 300);
-    searchInput.addEventListener('input', (e) => {
-        performSearch(e.target.value);
-    });
-    resultsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('autocomplete-item')) {
-            window.location.href = e.target.getAttribute('data-url');
-        }
-    });
-    resultsContainer.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.classList.contains('autocomplete-item')) {
-            window.location.href = e.target.getAttribute('data-url');
-        }
-    });
-    document.addEventListener('click', (e) => {
-        if (!resultsContainer.contains(e.target) && e.target !== searchInput) {
-            resultsContainer.style.display = 'none';
-        }
+// Filtro por Categoría
+function initCategoryFilter() {
+    const filters = document.querySelectorAll('.category-filter');
+    filters.forEach(filter => {
+        filter.addEventListener('click', () => {
+            const category = filter.getAttribute('data-category');
+            window.location.href = `/productos/?category=${category}`;
+        });
     });
 }
 
-/* Función simulada para manejo del carrito */
-function initCart() {
-    const cartCount = document.getElementById('cartCount');
-    const savedCount = localStorage.getItem('cartCount');
-    cartCount.textContent = savedCount !== null ? savedCount : '0';
-}
-
-/* Función para actualizar el contador del carrito y guardarlo en localStorage */
-function updateCartCount(newCount) {
-    const cartCount = document.getElementById('cartCount');
-    cartCount.textContent = newCount;
-    localStorage.setItem('cartCount', newCount);
-}
-
-/* Función para mostrar Toasts */
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-bg-${type} border-0`;
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    document.querySelector('.toast-container').appendChild(toast);
-    new bootstrap.Toast(toast).show();
-}
-
-/* Funciones adicionales originales */
-
-/* LightGallery para productos */
+// LightGallery para productos
 function initLightGallery() {
     const gallery = document.getElementById('product-gallery');
     if (gallery) {
@@ -150,73 +100,15 @@ function initLightGallery() {
     }
 }
 
-/* Filtro por Categoría */
-function initCategoryFilter() {
-    const filters = document.querySelectorAll('.category-filter');
-    filters.forEach(filter => {
-        filter.addEventListener('click', () => {
-            const category = filter.getAttribute('data-category');
-            window.location.href = `/productos/?category=${category}`;
-        });
-    });
-}
-
-/* Búsqueda en tiempo real (versión con API) */
-function initRealTimeSearch() {
-    const searchInput = document.getElementById('globalSearch');
-    if (!searchInput) return;
-    const debounce = (func, delay) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func(...args), delay);
-        };
-    };
-    const performSearch = debounce(async (query) => {
-        try {
-            const response = await fetch(`/buscar/?search=${encodeURIComponent(query)}`);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            const data = await response.json();
-            const productGrid = document.getElementById('productGrid');
-            if (productGrid) {
-                productGrid.innerHTML = data.results.map(product => `
-                    <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <div class="ratio ratio-1x1">
-                                <img src="${product.imagen}" 
-                                     class="card-img-top object-fit-cover" 
-                                     alt="${product.nombre}" loading="lazy">
-                            </div>
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title fs-6">${product.nombre}</h5>
-                                <p class="card-text fw-bold text-primary">$${product.precio}</p>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        } catch (error) {
-            console.error('Error en la búsqueda:', error);
-        }
-    }, 300);
-    searchInput.addEventListener('input', (e) => {
-        performSearch(e.target.value);
-    });
-}
-
-/* Nuevas funciones de mejoras UX (no modifican las existentes) */
-
-/* Inicializar Tooltips de Bootstrap */
+// Tooltips de Bootstrap
 function initTooltips() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(tooltipTriggerEl => {
         new bootstrap.Tooltip(tooltipTriggerEl);
     });
 }
 
-/* Forzar Lazy Load en imágenes sin el atributo 'loading' */
+// Lazy Load en imágenes sin atributo "loading"
 function initLazyLoadImages() {
     const images = document.querySelectorAll('img:not([loading])');
     images.forEach(img => {
@@ -224,29 +116,66 @@ function initLazyLoadImages() {
     });
 }
 
-/* Mejora de navegación por teclado en Autocomplete */
-function initAutocompleteKeyboardNav() {
+// Función debounce (debe estar definida antes de usarla)
+function debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+function initGlobalSearch() {
     const searchInput = document.getElementById('globalSearch');
-    const resultsContainer = document.getElementById('autocompleteResults');
-    let currentFocus = -1;
-    searchInput.addEventListener('keydown', function(e) {
-        const items = resultsContainer.querySelectorAll('.autocomplete-item');
-        if (!items.length) return;
-        if (e.key === 'ArrowDown') {
-            currentFocus++;
-            addActive(items);
-            e.preventDefault();
-        } else if (e.key === 'ArrowUp') {
-            currentFocus--;
-            addActive(items);
-            e.preventDefault();
-        } else if (e.key === 'Enter') {
-            if (currentFocus > -1 && items[currentFocus]) {
-                items[currentFocus].click();
-                e.preventDefault();
-            }
+    const productGrid = document.getElementById('productGrid');
+
+    // Asegúrate de que el input tenga el atributo data-url con la URL correcta:
+    // data-url="{% url 'productos:filtrar_productos' %}"
+
+    const debounceSearch = debounce(async (query) => {
+        const params = new URLSearchParams(window.location.search);
+        params.set('search', query);
+
+        try {
+            // Usamos template string para construir la URL
+            const response = await fetch(`${searchInput.dataset.url}?${params.toString()}`);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            
+            // Se espera que la respuesta sea JSON con la clave 'html'
+            const data = await response.json();
+            productGrid.innerHTML = data.html;
+
+            // Opcional: reiniciar animaciones (si tienes definido un observer)
+            productGrid.querySelectorAll('.card').forEach(card => {
+                card.style.opacity = "0";
+                card.style.transform = "translateY(20px)";
+                if (typeof observer !== 'undefined') {
+                    observer.observe(card);
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error en búsqueda:', error);
+            productGrid.innerHTML = `<div class="text-center text-danger py-3">Ocurrió un error al cargar los productos.</div>`;
         }
-    });
+    }, 300);
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            debounceSearch(e.target.value);
+        });
+    }
+}
+
+// Inicializa la búsqueda global cuando el DOM esté cargado
+document.addEventListener('DOMContentLoaded', function () {
+    initGlobalSearch();
+});
+
+
+
+
     function addActive(items) {
         removeActive(items);
         if (currentFocus >= items.length) currentFocus = 0;
@@ -256,12 +185,84 @@ function initAutocompleteKeyboardNav() {
     function removeActive(items) {
         items.forEach(item => item.classList.remove('autocomplete-active'));
     }
+
+
+// Manejo global de errores
+    function initGlobalErrorHandler() {
+        window.addEventListener('error', (e) => {
+            console.error('Error global capturado:', e.error);
+            showToast('Ha ocurrido un error inesperado', 'danger');
+        });
+    }
+
+// =====================================================
+// 2. FUNCIONES DEL CARRITO (AJAX)
+// =====================================================
+
+// Inicializa el contador del carrito consultándolo al servidor
+function initCart() {
+    const url = (typeof CART_COUNT_URL !== 'undefined') ? CART_COUNT_URL : '/cart/cart/count/';
+    fetch(url)
+        .then(response => response.json().catch(err => {
+            console.error('La respuesta no es JSON. Respuesta:', response);
+            throw err;
+        }))
+        .then(data => {
+            if (data.cart_count !== undefined) {
+                updateCartCount(data.cart_count);
+            }
+        })
+        .catch(error => console.error('Error al obtener el conteo del carrito:', error));
 }
 
-/* Manejo global de errores para capturar excepciones no previstas */
-function initGlobalErrorHandler() {
-    window.addEventListener('error', (e) => {
-        console.error('Error global capturado:', e.error);
-        showToast('Ha ocurrido un error inesperado', 'danger');
+// Actualiza el contador en el DOM y en localStorage
+function updateCartCount(newCount) {
+    const cartCount = document.getElementById('cartCount');
+    if (cartCount) {
+        cartCount.textContent = newCount;
+    }
+    localStorage.setItem('cartCount', newCount);
+    document.querySelectorAll('.cart-count-indicator').forEach(element => {
+        element.textContent = newCount;
     });
 }
+
+// Configura la sincronización del carrito entre pestañas y al recuperar el foco
+function setupCartSync() {
+    window.addEventListener('focus', initCart);
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'cartCount') {
+            initCart();
+        }
+    });
+}
+
+
+// =====================================================
+// 3. INICIALIZACIÓN DE SINCRONIZACIÓN DEL CARRITO
+// =====================================================
+function setupCartSynchronization() {
+    setupCartSync();
+    
+}
+
+// =====================================================
+// FIN DEL SCRIPT: Inicialización general
+// =====================================================
+document.addEventListener('DOMContentLoaded', function () {
+    // Funciones de UX & Utilidades
+    initUXFeatures();
+    initScrollTop();
+    initDarkMode();
+    initCategoryFilter();
+    initLightGallery();
+    initTooltips();
+    initLazyLoadImages();
+    initGlobalErrorHandler();
+    initGlobalSearch();
+   
+    
+    // Funciones del Carrito
+    initCart();
+    setupCartSynchronization();
+});

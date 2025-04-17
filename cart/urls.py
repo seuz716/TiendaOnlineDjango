@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     CartListView, CartDetailView, CartCreateView, CartUpdateView, CartDeleteView,
-    add_to_cart, enviar_whatsapp, cart_count, PedidoCreateView
+    add_to_cart, enviar_whatsapp, cart_count, PedidoCreateView, get_cart_count
 )
 
 app_name = 'cart'
@@ -15,4 +15,5 @@ urlpatterns = [
     path('enviar/', enviar_whatsapp, name='enviar'),
     path('pedido/', PedidoCreateView.as_view(), name='pedido_create'),
     path('count/', cart_count, name='count'),
+    path('cart/count/', get_cart_count, name='cart-count'),
 ]

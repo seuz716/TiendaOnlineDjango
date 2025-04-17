@@ -1,21 +1,27 @@
 from django.contrib import admin
-from .models import Categoria, Producto
+from .models import Categoria, Producto, ProductoImage
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'slug', 'icono')  # Muestra estos campos en la lista
-    search_fields = ('nombre',)  # Permite buscar por nombre
-    prepopulated_fields = {'slug': ('nombre',)}  # Genera automáticamente el slug desde el nombre
-    ordering = ('nombre',)  # Ordena por nombre
-    list_per_page = 20  # Limita el número de elementos por página
+    list_display = ('nombre', 'slug', 'icono')
+    search_fields = ('nombre',)
+    prepopulated_fields = {'slug': ('nombre',)}
+    ordering = ('nombre',)
+    list_per_page = 20
+
+class ProductoImageInline(admin.TabularInline):
+    model = ProductoImage
+    extra = 6  # Se mostrarán 6 formularios en blanco para nuevas imágenes
+    fields = ('imagen', 'orden',)
+    ordering = ('orden',)
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'precio', 'stock', 'disponible', 'categoria', 'creado')  # Campos visibles en la lista
-    search_fields = ('nombre', 'categoria__nombre')  # Búsqueda por nombre y categoría
-    list_filter = ('disponible', 'categoria')  # Filtrado por disponibilidad y categoría
-    prepopulated_fields = {'slug': ('nombre',)}  # Genera automáticamente el slug desde el nombre
-    readonly_fields = ('creado', 'actualizado')  # Solo lectura para fechas automáticas
+    list_display = ('nombre', 'precio', 'stock', 'disponible', 'categoria', 'creado')
+    search_fields = ('nombre', 'categoria__nombre')
+    list_filter = ('disponible', 'categoria')
+    prepopulated_fields = {'slug': ('nombre',)}
+    readonly_fields = ('creado', 'actualizado')
     fieldsets = (
         ('Información básica', {
             'fields': ('nombre', 'slug', 'descripcion', 'categoria', 'imagen')
@@ -25,13 +31,14 @@ class ProductoAdmin(admin.ModelAdmin):
         }),
         ('Datos avanzados', {
             'fields': ('caracteristicas',),
-            'classes': ('collapse',)  # Oculta esta sección por defecto
+            'classes': ('collapse',)
         }),
         ('Fechas', {
             'fields': ('creado', 'actualizado'),
             'classes': ('collapse',)
         }),
     )
-    ordering = ('-creado',)  # Ordena por fecha de creación descendente
-    list_editable = ('precio', 'stock', 'disponible')  # Permite edición directa desde la lista
-    list_per_page = 20  # Limita los productos por página
+    ordering = ('-creado',)
+    list_editable = ('precio', 'stock', 'disponible')
+    list_per_page = 20
+    inlines = [ProductoImageInline]

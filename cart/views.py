@@ -10,11 +10,16 @@ from .models import Carrito, Pedido
 from productos.models import Producto
 
 
+def get_session_key(request):
+    """
+    Retorna el session key de la request; si no existe, lo crea.
+    """
+    if not request.session.session_key:
+        request.session.create()
+    return request.session.session_key
+
+
 def construir_mensaje_pedido(carrito_items, pedido=None):
-    """
-    Construye el mensaje del pedido a partir de los items del carrito.
-    Si se proporciona 'pedido', se añade la información del cliente.
-    """
     mensaje = "Pedido:\n"
     total = 0
     for item in carrito_items:
@@ -35,10 +40,6 @@ def construir_mensaje_pedido(carrito_items, pedido=None):
 
 
 def enviar_correo_pedido(pedido, mensaje):
-    """
-    Envía el correo de confirmación del pedido usando la cuenta ceanabad@gmail.com.
-    Asegúrate de tener configurados los ajustes de correo en settings.py.
-    """
     subject = "Confirmación de Pedido"
     from_email = "ceanabad@gmail.com"
     recipient_list = [pedido.correo]
@@ -46,9 +47,6 @@ def enviar_correo_pedido(pedido, mensaje):
 
 
 def construir_url_whatsapp(mensaje):
-    """
-    Codifica el mensaje y construye la URL de WhatsApp para enviar el pedido.
-    """
     params = urlencode({"text": mensaje})
     whatsapp_url = f"https://api.whatsapp.com/send?phone=+573166710912&{params}"
     return whatsapp_url
@@ -57,11 +55,7 @@ def construir_url_whatsapp(mensaje):
 # --- Función para agregar productos al carrito ---
 def add_to_cart(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
-    session_key = request.session.session_key
-    if not session_key:
-        request.session.create()
-        session_key = request.session.session_key
-
+    session_key = get_session_key(request)
     cantidad = int(request.POST.get('cantidad', 1))
     item, created = Carrito.objects.get_or_create(
         session_key=session_key,
@@ -74,7 +68,7 @@ def add_to_cart(request, producto_id):
 
     cart_count = Carrito.objects.filter(session_key=session_key).count()
 
-    # Detecta solicitud AJAX usando request.META
+    # Responde en JSON si es solicitud AJAX
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
         return JsonResponse({'success': True, 'cart_count': cart_count})
     else:
@@ -88,10 +82,8 @@ class CartListView(ListView):
     context_object_name = 'items'
 
     def get_queryset(self):
-        session_key = self.request.session.session_key
-        if not session_key:
-            self.request.session.create()
-        return Carrito.objects.filter(session_key=self.request.session.session_key)
+        session_key = get_session_key(self.request)
+        return Carrito.objects.filter(session_key=session_key)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -112,10 +104,8 @@ class CartCreateView(CreateView):
     fields = ['producto', 'cantidad']
 
     def form_valid(self, form):
-        session_key = self.request.session.session_key
-        if not session_key:
-            self.request.session.create()
-        form.instance.session_key = self.request.session.session_key
+        session_key = get_session_key(self.request)
+        form.instance.session_key = session_key
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -138,11 +128,8 @@ class CartDeleteView(DeleteView):
 
 
 def cart_count(request):
-    session_key = request.session.session_key
-    if not session_key:
-        count = 0
-    else:
-        count = Carrito.objects.filter(session_key=session_key).count()
+    session_key = get_session_key(request)
+    count = Carrito.objects.filter(session_key=session_key).count()
     return JsonResponse({'count': count})
 
 
@@ -157,10 +144,7 @@ class PedidoCreateView(CreateView):
 
     def form_valid(self, form):
         with transaction.atomic():
-            session_key = self.request.session.session_key
-            if not session_key:
-                self.request.session.create()
-                session_key = self.request.session.session_key
+            session_key = get_session_key(self.request)
             form.instance.session_key = session_key
             self.object = form.save()
 
@@ -183,14 +167,17 @@ class PedidoCreateView(CreateView):
 
 # --- Vista para enviar pedido a WhatsApp (opcional) ---
 def enviar_whatsapp(request):
-    session_key = request.session.session_key
-    if not session_key:
-        return redirect('cart:list')
+    session_key = get_session_key(request)
     carrito_items = Carrito.objects.filter(session_key=session_key)
     if not carrito_items.exists():
         return redirect('cart:list')
     
     mensaje = construir_mensaje_pedido(carrito_items)
     whatsapp_url = construir_url_whatsapp(mensaje)
-    
     return redirect(whatsapp_url)
+
+
+def get_cart_count(request):
+    session_key = get_session_key(request)
+    cart_count = Carrito.objects.filter(session_key=session_key).count()
+    return JsonResponse({'cart_count': cart_count})

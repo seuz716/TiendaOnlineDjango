@@ -29,6 +29,14 @@ tienda/
 │   ├── base.html
 │   ├── includes/
 │   │   ├── navbar.html
+		templates/
+├── base.html
+├── includes/
+│   ├── navbar.html
+│   ├── footer.html
+│   ├── scripts.html
+│   └── head.html
+
 ├── tienda/                     # Configuración general del proyecto
 │   ├── __init__.py
 │   ├── asgi.py

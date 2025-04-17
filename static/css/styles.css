@@ -18,9 +18,23 @@ body {
 }
 
 body.dark-mode {
-    background-color: var(--bg-dark);
-    color: var(--text-light);
+  background-color: #121212;
+  color: #ffffff;
 }
+
+body.dark-mode .navbar {
+  background-color: #1f1f1f !important;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #2c2c2c;
+  color: white;
+}
+
+body.dark-mode .dropdown-item {
+  color: white;
+}
+
 
 /* Animaciones */
 @keyframes fadeIn {
@@ -165,4 +179,16 @@ body.dark-mode {
     .navbar-brand {
         font-size: 0.9rem;
     }
+}
+
+/* Animación de actualización del contador */
+@keyframes cartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cart-count-indicator {
+    transition: all 0.3s ease;
+    animation: cartPulse 0.5s ease-in-out;
 }

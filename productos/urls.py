@@ -2,10 +2,10 @@ from django.urls import path
 from .views import (
     CategoriaListView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView,
     ProductoListView, ProductoClientListView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView,
-    buscar_productos, filtrar_productos, filtrar_productos_adm
+    buscar_productos, filtrar_productos, filtrar_productos_adm, ProductoDetailView
 )
 
-
+app_name = 'productos'
 
 urlpatterns = [
     # Categorías (administración)
@@ -19,8 +19,9 @@ urlpatterns = [
     path('productos/nuevo/', ProductoCreateView.as_view(), name='producto-create'),
     path('productos/editar/<int:pk>/', ProductoUpdateView.as_view(), name='producto-update'),
     path('productos/eliminar/<int:pk>/', ProductoDeleteView.as_view(), name='producto-delete'),
-    path('buscar/', buscar_productos, name='buscar-productos'),
+    path('buscar/', buscar_productos, name='buscar_productos'),
     path('filtrar/', filtrar_productos, name='filtrar_productos'),
+    path('producto/<int:pk>/', ProductoDetailView.as_view(), name='producto-detail'),
     path('filtrarAdm/', filtrar_productos_adm, name='filtrar_productos_adm'),
 
 
