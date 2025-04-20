@@ -143,6 +143,20 @@ class PedidoCreateView(CreateView):
     ]
 
     def form_valid(self, form):
+        self.object = form.save()
+        # En lugar de redirigir, renderiza el mismo template con el mensaje de éxito
+        return render(self.request, self.template_name, {
+            'pedido_exitoso': True
+        })
+
+    def form_invalid(self, form):
+        # Si hay errores, sigue mostrando el formulario con los errores
+        return render(self.request, self.template_name, {
+            'form': form,
+            'pedido_exitoso': False
+        })
+
+    def form_valid(self, form):
         with transaction.atomic():
             session_key = get_session_key(self.request)
             form.instance.session_key = session_key

@@ -37,6 +37,8 @@ function getCookie(name) {
     return cookieValue;
 }
 
+
+
 // Animaciones al hacer scroll
 function initUXFeatures() {
     const observer = new IntersectionObserver((entries) => {
@@ -62,6 +64,8 @@ function initDarkMode() {
         });
     }
 }
+
+
 
 // Scroll to Top
 function initScrollTop() {

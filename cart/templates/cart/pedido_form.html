@@ -1,130 +1,113 @@
+{# pedido_form.html #}
 {% extends 'base.html' %}
-{% load static widget_tweaks %}
+{% load static %}
+{% load widget_tweaks %}
 
-{% block extra_head %}
-  <style>
-    /* Dark/Light Mode Styles */
-    body.dark-mode { background-color: #121212 !important; color: #eee !important; }
-    body.dark-mode .card, body.dark-mode .form-control, body.dark-mode .btn { background-color: #1e1e1e !important; }
-    /* Spacing and form layout */
-    .form-group { margin-bottom: 1.5rem; }
-    .checkout-form { padding: 1.5rem; background: var(--bs-body-bg); border-radius: .5rem; box-shadow: var(--bs-card-box-shadow); }
-    .datalist-options { position: absolute; z-index: 1000; width: 100%; background: var(--bs-body-bg); border: 1px solid #ccc; max-height: 150px; overflow-y: auto; }
-    .datalist-option { padding: .5rem; cursor: pointer; }
-    .datalist-option:hover { background: #f1f1f1; }
-    body.dark-mode .datalist-option:hover { background: #444; }
-  </style>
-{% endblock %}
+{% block title %}Realizar Pedido - Tienda Online{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-  <!-- Theme Toggle -->
-    <div class="row justify-content-center">
-    <div class="col-lg-6">
-      <div class="card shadow mb-4">
-        <div class="card-header">
-          <h5 class="mb-0">Formulario de Pedido</h5>
-        </div>
-        <div class="card-body">
-          <form id="pedidoForm" method="post" novalidate class="checkout-form">
-            {% csrf_token %}
-
+  {% if pedido_exitoso %}
+    <div class="alert alert-success text-center py-5 success-message shadow-lg rounded-4">
+      <i class="fa-solid fa-circle-check fa-4x text-success mb-4"></i>
+      <h2 class="fw-bold">¡Gracias por tu pedido! 💖</h2>
+      <p class="lead">Estamos felices de tenerte con nosotros. Tu pedido está en camino. 🚚✨</p>
+      <p>¡Esperamos verte pronto de nuevo!</p>
+    </div>
+  {% else %}
+    <div class="card card-gradient p-4">
+      <div class="card-body px-4 py-5">
+        <h1 class="mb-4 text-center fw-bold">Nuevo Pedido</h1>
+        
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          
+          <div class="row g-3">
             {% for field in form %}
-              <div class="form-group position-relative">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {% if field.name == 'direccion' %}
-                  {{ field|add_class:"form-control form-control-lg" }}
-                  <div id="addressList" class="datalist-options d-none"></div>
-                {% else %}
-                  {{ field|add_class:"form-control form-control-lg" }}
-                {% endif %}
-                {% if field.help_text %}
-                  <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% for error in field.errors %}
-                  <div class="text-danger">{{ error }}</div>
-                {% endfor %}
+              <div class="col-12 {% if field.name != 'direccion' %}col-md-6{% endif %}">
+                <div class="form-floating">
+                  {% render_field field class+="form-control" placeholder=field.label %}
+                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                  
+                  {% if field.help_text %}
+                    <div class="form-text text-muted mt-2">
+                      <i class="fas fa-info-circle me-2"></i>{{ field.help_text }}
+                    </div>
+                  {% endif %}
+                  
+                  {% for error in field.errors %}
+                    <div class="invalid-feedback d-block">
+                      {{ error }}
+                    </div>
+                  {% endfor %}
+                </div>
               </div>
             {% endfor %}
+          </div>
 
-            <div class="form-group text-end">
-              <button type="button" id="useCurrentLocation" class="btn btn-outline-info btn-sm">
-                <i class="bi bi-geo-alt"></i> Mi Ubicación
-              </button>
-            </div>
-
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">
-                <i class="bi bi-check-circle-fill me-1"></i> Confirmar Pedido
-              </button>
-            </div>
-          </form>
-        </div>
+          <div class="text-center mt-5">
+            <button type="submit" class="btn btn-primary btn-lg btn-animate px-5 py-3">
+              <i class="fa-solid fa-paper-plane me-2"></i>Confirmar Pedido
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
+  {% endif %}
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_css %}
+<style>
+  .card-gradient {
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border: none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
+    border-radius: 1.5rem;
+  }
+
+  .btn-animate {
+    transition: all 0.3s ease-in-out;
+    min-width: 200px;
+  }
+
+  .btn-animate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+  }
+
+  .form-floating textarea.form-control {
+    height: 100px !important;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Theme toggle
-  const toggle = document.getElementById('themeToggle');
-  const applyTheme = theme => {
-    document.body.classList.toggle('dark-mode', theme === 'dark');
-    toggle.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
-    localStorage.setItem('theme', theme);
-  };
-  const saved = localStorage.getItem('theme') || 'light'; applyTheme(saved);
-  toggle.addEventListener('click', () => applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark'));
-
-  // Input mask for phone
-  const tel = document.getElementById('{{ form.telefono.id_for_label }}');
-  if (tel) { $(tel).inputmask('+56 9 9999 9999'); }
-
-  // Address autocomplete via OpenStreetMap
-  const dir = document.getElementById('{{ form.direccion.id_for_label }}');
-  const list = document.getElementById('addressList');
-  dir.addEventListener('input', async e => {
-    const q = e.target.value;
-    if (q.length < 3) return list.classList.add('d-none');
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`);
-    const data = await res.json();
-    list.innerHTML = data.map(i => `<div class="datalist-option">${i.display_name}</div>`).join('');
-    list.classList.toggle('d-none', data.length === 0);
-  });
-  list.addEventListener('click', e => {
-    if (e.target.classList.contains('datalist-option')) {
-      dir.value = e.target.textContent;
-      list.classList.add('d-none');
-    }
+document.addEventListener('DOMContentLoaded', function() {
+  // Validación de formulario
+  const forms = document.querySelectorAll('.needs-validation');
+  
+  Array.prototype.slice.call(forms).forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
   });
 
-  // Geolocation reverse geocode
-  document.getElementById('useCurrentLocation').addEventListener('click', () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async pos => {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
-        const resp = await fetch(url);
-        const obj = await resp.json();
-        dir.value = obj.display_name;
-      });
-    }
-  });
-
-  // Submit handler (simulate)
-  document.getElementById('pedidoForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span>Procesando...`;
-    setTimeout(() => {
-      alert('¡Pedido confirmado!');
-      btn.disabled = false;
-      btn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Confirmar Pedido`;
-    }, 1500);
-  });
+  // Máscara para teléfono
+  const phoneField = document.querySelector('[name="telefono"]');
+  if (phoneField) {
+    phoneField.addEventListener('input', function(e) {
+      e.target.value = e.target.value
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d)/, '+$1 $2')
+        .replace(/(\d)(\d{4})(\d{4})/, '$1 $2 $3');
+    });
+  }
 });
 </script>
 {% endblock %}

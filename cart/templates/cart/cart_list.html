@@ -95,14 +95,14 @@
 <div class="modal fade" id="checkoutModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header text-danger">
                 <h5 class="modal-title">Confirmar Pedido</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body text-danger">
                 ¿Estás seguro que deseas finalizar la compra?
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer text-danger">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <a href="{% url 'cart:pedido_create' %}" class="btn btn-success" id="confirmCheckout">
                     <span class="spinner-border spinner-border-sm d-none" role="status"></span>
@@ -194,12 +194,23 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('cart-total').textContent = total.toLocaleString();
     }
 });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        initDarkMode();
+    });
+
 </script>
 <style>
+
 .sticky-top {
     top: -1px;
     background: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.modal-body {
+   color: blue;
 }
 
 .empty-cart {

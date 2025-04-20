@@ -192,3 +192,57 @@ body.dark-mode .dropdown-item {
     transition: all 0.3s ease;
     animation: cartPulse 0.5s ease-in-out;
 }
+
+/* 🌙 Modo Oscuro General */
+body.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
+}
+
+/* 🧱 Modales */
+body.dark-mode .modal-content {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    border: 1px solid #333;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #444;
+}
+
+/* 📝 Formularios */
+body.dark-mode .form-control {
+    background-color: #1e1e1e;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #bbb;
+}
+
+/* 🖱️ Botones (opcionalmente puedes redefinir colores si quieres más contraste) */
+body.dark-mode .btn-secondary {
+    background-color: #444;
+    border-color: #666;
+    color: #f1f1f1;
+}
+
+body.dark-mode .btn-success {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+/* 🧾 Otros elementos con fondo blanco por defecto */
+body.dark-mode .card,
+body.dark-mode .alert,
+body.dark-mode .dropdown-menu {
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+/* 🌈 Enlaces */
+body.dark-mode a {
+    color: #82cfff;
+}
