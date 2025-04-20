@@ -13,10 +13,10 @@
             <h5 class="card-title fs-6 mb-2">{{ producto.nombre }}</h5>
             <p class="card-text fw-bold text-primary mb-3">$ {{ producto.precio }}</p>
             <div class="mt-auto d-grid gap-2">
-                <a href="{% url 'producto-update' producto.pk %}" class="btn btn-sm btn-outline-warning">
+                <a href="{% url 'productos:producto-update' producto.pk %}" class="btn btn-sm btn-outline-warning">
                     <i class="fas fa-edit me-2"></i>Editar
                 </a>
-                <a href="{% url 'producto-delete' producto.pk %}" class="btn btn-sm btn-outline-danger">
+                <a href="{% url 'productos:producto-delete' producto.pk %}" class="btn btn-sm btn-outline-danger">
                     <i class="fas fa-trash me-2"></i>Eliminar
                 </a>
             </div>

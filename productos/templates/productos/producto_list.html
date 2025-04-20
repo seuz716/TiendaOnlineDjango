@@ -77,13 +77,13 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'producto-create' %}">
+                                    <a class="dropdown-item" href="{% url 'productos:producto-create' %}">
                                         <i class="fas fa-box-open me-2"></i>Crear Nuevo Producto
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'categoria-create' %}">
+                                    <a class="dropdown-item" href="{% url 'productos:categoria-create' %}">
                                         <i class="fas fa-tag me-2"></i>Nueva Categoría
                                     </a>
                                 </li>
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             loadingSpinner.classList.remove('d-none');
             
-            const response = await fetch(`{% url 'filtrar_productos_adm' %}?${params.toString()}`);
+            const response = await fetch(`{% url 'productos:filtrar_productos_adm' %}?${params.toString()}`);
             if (!response.ok) throw new Error('Error en la respuesta');
             
             const data = await response.json();

@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'widget_tweaks',
     
     # Apps del proyecto
     'productos',
@@ -91,9 +93,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # ✅ Ruta para los archivos estáticos
 ]
 
-# Configuración de redirección tras login/logout
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -114,7 +113,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-LOGIN_REDIRECT_URL = 'producto-list'  # Redirecciona aquí después del login
+LOGIN_REDIRECT_URL = 'productos:producto-list'  # Redirecciona aquí después del login
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/'
 # Configuración de seguridad adicional
@@ -122,8 +121,8 @@ SECURE_HSTS_SECONDS = 31536000  # 1 año
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = False  # Cambiar a True en producción con HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
