@@ -134,6 +134,8 @@ def cart_count(request):
 
 
 # --- Vista para procesar el pedido (checkout) ---
+from django.shortcuts import render  # asegúrate de que esté importado
+
 class PedidoCreateView(CreateView):
     model = Pedido
     template_name = 'cart/pedido_form.html'
@@ -141,20 +143,6 @@ class PedidoCreateView(CreateView):
         'nombre', 'telefono', 'direccion', 'detalles',
         'correo', 'necesita_factura', 'numero_documento', 'archivo_rut'
     ]
-
-    def form_valid(self, form):
-        self.object = form.save()
-        # En lugar de redirigir, renderiza el mismo template con el mensaje de éxito
-        return render(self.request, self.template_name, {
-            'pedido_exitoso': True
-        })
-
-    def form_invalid(self, form):
-        # Si hay errores, sigue mostrando el formulario con los errores
-        return render(self.request, self.template_name, {
-            'form': form,
-            'pedido_exitoso': False
-        })
 
     def form_valid(self, form):
         with transaction.atomic():
@@ -173,10 +161,19 @@ class PedidoCreateView(CreateView):
 
             # Vacía el carrito tras crear el pedido
             carrito_items.delete()
+
+        # Aquí puedes redirigir a WhatsApp o mostrar un mensaje de éxito en la misma página
         return redirect(whatsapp_url)
+
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {
+            'form': form,
+            'pedido_exitoso': False
+        })
 
     def get_success_url(self):
         return reverse_lazy('cart:list')
+        
 
 
 # --- Vista para enviar pedido a WhatsApp (opcional) ---

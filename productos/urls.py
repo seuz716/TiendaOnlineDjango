@@ -26,5 +26,5 @@ urlpatterns = [
 
 
     # Cliente: Listado de Productos con descripción resumida y "Agregar al Carrito"
-    path('', ProductoClientListView.as_view(), name='producto-client-list'),
+    path('', ProductoClientListView.as_view(), name='producto_client_list'),
 ]

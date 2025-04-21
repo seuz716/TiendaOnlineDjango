@@ -16,6 +16,7 @@ urlpatterns = [
     path('accounts/', RedirectView.as_view(url='/accounts/login/')),  # Redirección
     path('accounts/', include('django.contrib.auth.urls')),  # URLs de autenticación
     path('', include('productos.urls', namespace='productos')),
+    
     path('cart/', include('cart.urls')),
 ]
 
