@@ -91,7 +91,7 @@ class ProductoDeleteView(LoginRequiredMixin,DeleteView):
     success_url = reverse_lazy('productos:producto-list')
 
 
-class ProductoDetailView(LoginRequiredMixin,DetailView):
+class ProductoDetailView(DetailView):
     model = Producto
     template_name = 'productos/producto_detail.html'
 
