@@ -95,6 +95,18 @@ class ProductoDetailView(DetailView):
     model = Producto
     template_name = 'productos/producto_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        producto = self.object
+
+        # Obtener hasta 4 productos aleatorios de la misma categoría (excluyendo el actual)
+        context['related_products'] = Producto.objects.filter(
+            categoria=producto.categoria,
+            disponible=True
+        ).exclude(id=producto.id).order_by('?')[:4]
+
+        return context
+
 
 class ProductoClientListView(ListView):
     model = Producto

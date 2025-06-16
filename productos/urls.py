@@ -1,4 +1,8 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+
+
 from .views import (
     CategoriaListView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView,
     ProductoListView, ProductoClientListView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView,
@@ -28,3 +32,6 @@ urlpatterns = [
     # Cliente: Listado de Productos con descripción resumida y "Agregar al Carrito"
     path('', ProductoClientListView.as_view(), name='producto_client_list'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

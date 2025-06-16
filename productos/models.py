@@ -61,7 +61,7 @@ class Producto(models.Model):
         return self.nombre
 
     def get_absolute_url(self):
-        return reverse('detalle_producto', args=[str(self.id)])    
+         return reverse('productos:producto-detail', args=[str(self.id)])  
 
 # Modelo para múltiples imágenes por producto
 class ProductoImage(models.Model):
